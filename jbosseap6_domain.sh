@@ -28,7 +28,7 @@ export HOST="$5"
 # nome da instância que executa a aplicação
 export INSTANCIA="$6"
 
-#Item a ser coletada
+#Item a ser coletada, no caso do APP_EAR deve ser o nome do pacote ear, e no caso do APP_WAR o nome pacote war
 export ITEM="$7"
 
 # para monitorar o datasource, é preciso habilitar a estatística
@@ -120,6 +120,28 @@ if [ $OBJETO == 'jvm-non-heap' ]; then
 	max)
 		$PATH_JBOSS_CLI/jboss-cli.sh -c --controller=$CONTROLLER:$PORT_CLI --user=$USUARIO --password=$SENHA --command="/host=$HOST/server=$INSTANCIA/core-service=platform-mbean/type=memory:read-attribute(name=non-heap-memory-usage)"|grep max|awk '{print $3}'|cut -d\" -f2|cut -d\L -f1
 ;;
+
+	*)
+		echo "Item não encontrado"
+	;;
+
+esac
+
+fi
+
+if [ $OBJETO == 'sessions' ]; then
+
+
+  case $ITEM in
+
+	active-sessions)
+		$PATH_JBOSS_CLI/jboss-cli.sh -c --controller=$CONTROLLER:$PORT_CLI --user=$USUARIO --password=$SENHA --command="/host=$HOST/server=$INSTANCIA/deployment=$APP_EAR/subdeployment=$APP_WAR/subsystem=web:read-attribute(name=active-sessions)"|grep result|awk '{print $3}'
+;;
+
+	rejected-sessions)
+		$PATH_JBOSS_CLI/jboss-cli.sh -c --controller=$CONTROLLER:$PORT_CLI --user=$USUARIO --password=$SENHA --command="/host=$HOST/server=$INSTANCIA/deployment=$APP_EAR/subdeployment=$APP_WAR/subsystem=web:read-attribute(name=rejected-sessions)"|grep result|awk '{print $3}'
+;;
+
 
 	*)
 		echo "Item não encontrado"
